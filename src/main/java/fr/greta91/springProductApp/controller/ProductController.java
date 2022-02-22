@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,7 @@ import fr.greta91.springProductApp.repository.ProductRepository;
  * DELETE/api/product/{id} -> return boolean isDeletion
  */
 @RestController
+@CrossOrigin(origins="*", allowedHeaders="*") // Remove it on Production!
 @RequestMapping("/api/product")
 public class ProductController {
 

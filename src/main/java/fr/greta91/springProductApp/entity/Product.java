@@ -8,11 +8,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import fr.greta91.springProductApp.dto.ProductDTO;
+
 @Entity
 public class Product implements Serializable{
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
 	@Column(nullable = false)
 	private String name;
 	@Column(nullable = false)
@@ -20,10 +22,19 @@ public class Product implements Serializable{
 	@Column(nullable = false)
 	private double price;
 	
-	public Long getId() {
+	public Product() {
+		
+	}
+	public Product(ProductDTO productDto) {
+		this.setId(productDto.getId());
+		this.setName(productDto.getName());
+		this.setCategory(productDto.getCategory());
+		this.setPrice(productDto.getPrice());
+	}
+	public int getId() {
 		return id;
 	}
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public String getName() {

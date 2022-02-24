@@ -1,9 +1,9 @@
 package fr.greta91.springProductApp.controller;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -15,92 +15,85 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.greta91.springProductApp.dto.ProductDto;
+import fr.greta91.springProductApp.dto.ProductDTO;
 import fr.greta91.springProductApp.entity.Product;
 import fr.greta91.springProductApp.repository.ProductRepository;
-
-
-
 /**
- * 
- * @author thoma
- * 
- * base url : /api/product	
- * 
- * GET 	 /api/product 	   -> liste des produits 
- * POST  /api/product 	   -> return produit créé
- * GET 	 /api/product/{id} -> produit avec produit.id = id 
- * PUT 	 /api/product/{id} -> return produit modifié
- * DELETE/api/product/{id} -> return boolean isDeletion
+ * Rest API
+ * @author Soupramanien
+ *	base url : /api/product
+	GET /api/product -> renvoie la liste des produits
+	GET /api/product/{id} -> renvoie produit avec id {id}
+	POST /api/product -> renvoie produit créé
+	PUT /api/product/{id} -> renvoie produit modifié
+	DELETE /api/product/{id} -> renvoie un booléen
  */
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@CrossOrigin(origins="*", allowedHeaders="*") // Remove it on Production!
 @RequestMapping("/api/product")
 public class ProductController {
-
 	@Autowired
 	ProductRepository productRepository;
-
-	@RequestMapping(method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-	public Collection<Product> products() {
+	/*
+	 * GET /api/product -> renvoie la liste des produits
+	 */
+	@RequestMapping(method = RequestMethod.GET)
+	public List<Product> products(){
 		return productRepository.findAll();
 	}
-
-	@RequestMapping(value = "/{id}", produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Product> products(@PathVariable long id) {
-		Optional<Product> found = productRepository.findById(id);
-		return found.map(p->ResponseEntity.ok(p)).orElse(ResponseEntity.notFound().build());
-
-		/* est egal à:
-		 * 
-		 * Optional<Product> found = productRepository.findById(id);
-		 * if(found.isPresent()) {
-		 *		return ResponseEntity.ok(found.get());
-		 * }
-		 * return ResponseEntity.notFound().build();
-		 * 
-		 */
-	}
-
-
 	/*
-	 * use Postman to try out insertion
+	 * GET /api/product/{id} -> renvoie produit avec id {id}
 	 */
-	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<ProductDto> save(@RequestBody ProductDto productDto){
+	@RequestMapping(value="/{id}", method = RequestMethod.GET)
+	public ResponseEntity<Product> product(@PathVariable int id){
+		Optional<Product> optProduct = productRepository.findById(id);
+		if(optProduct.isPresent()) {
+			return ResponseEntity.ok(optProduct.get());
+		}
+		return ResponseEntity.notFound().build();
+//		return optProduct.map(p -> ResponseEntity.ok(p)).orElse(ResponseEntity.notFound().build());
+	}
+	/*
+	 * POST /api/product -> renvoie produit créé
+	 */
+	@RequestMapping(method = RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE )
+	public ResponseEntity<ProductDTO> save(@RequestBody ProductDTO productDto){
 		try {
 			Product p = new Product(productDto);
 			productRepository.save(p);
 			productDto.setId(p.getId());
 			return ResponseEntity.ok(productDto);
-
-		} catch (Exception e) {
+		}
+		catch(Exception e) {
 			return ResponseEntity.badRequest().build();
 		}
-
 	}
-
-	@RequestMapping(value = "/{id}", method=RequestMethod.DELETE)
-	public ResponseEntity<Boolean> delete(@PathVariable long id) {
+	/*
+	 * PUT /api/product/{id} -> renvoie produit modifié
+	 */
+	@RequestMapping(value="/{id}", method = RequestMethod.PUT, consumes=MediaType.APPLICATION_JSON_VALUE )
+	public ResponseEntity<ProductDTO> update(@RequestBody ProductDTO productDto){
+		try {
+			Product p = new Product(productDto);
+			productRepository.save(p);
+			productDto.setId(p.getId());
+			return ResponseEntity.ok(productDto);
+		}
+		catch(Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+	
+	/*
+	 * DELETE /api/product/{id} -> supprime le produit et renvoie un booléen
+	 */
+	@RequestMapping(value="/{id}", method = RequestMethod.DELETE )
+	public ResponseEntity<Boolean> delete(@PathVariable int id){
 		try {
 			productRepository.deleteById(id);
 			return ResponseEntity.ok(true);
-
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
 		}
-
-	}
-
-	@RequestMapping(method=RequestMethod.PUT)
-	public ResponseEntity<ProductDto> update(@RequestBody ProductDto productDto) {
-		try {
-			Product p = new Product(productDto);
-			productRepository.save(p);
-			productDto.setId(p.getId());
-			return ResponseEntity.ok(productDto);
-
-		} catch (Exception e) {
+		catch(Exception e) {
 			return ResponseEntity.badRequest().build();
 		}
 	}
